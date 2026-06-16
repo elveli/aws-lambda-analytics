@@ -36,28 +36,17 @@ The application is deployed using the `provided.al2023` Lambda runtime. This is 
 > **Note on `python3: not found` execution errors:** `provided.al2023` is a completely bare OS image. If you attempt to invoke this Lambda as-is, you will receive `Runtime.ExitError: exit status 127` because `python3` does not exist on the image. In a real-world scenario, you must statically compile Python and bundle it into the layer, or compile and upload your application using a Docker image (`Image` package type). For ease of execution out-of-the-box, the `terraform/lambda.tf` has been updated to use the fully managed `python3.12` runtime while preserving the `provided.al2023` scripting for demonstration purposes.
 
 ## 🛠 Deployment Instructions
-Ensure you have the AWS CLI and Terraform installed.
+Ensure you have the AWS CLI, Terraform, and Python/pip installed.
 
-1. Navigate to the `lambda/layer/` directory and install the required dependencies so they can be zipped by Terraform:
-   ```bash
-   cd lambda/layer
-   pip install -r requirements.txt -t python/
-   cd ../../
-   ```
-2. Navigate to the `terraform/` directory.
-3. Initialize Terraform:
-   ```bash
-   cd terraform
-   terraform init
-   ```
-4. Plan the deployment:
-   ```bash
-   terraform plan
-   ```
-5. Apply the infrastructure:
-   ```bash
-   terraform apply
-   ```
+We have included a convenience script that automatically compiles the Python layer dependencies and applies the Terraform configuration:
+
+```bash
+chmod +x deploy.sh
+./deploy.sh
+```
+
+> **Fixing `Runtime.ImportModuleError: No module named 'aws_xray_sdk'`:** 
+> If you deployed manually and encountered this error, it means Terraform packaged an empty Lambda layer because the dependencies were not downloaded first. Running `./deploy.sh` resolves this by cleanly installing `requirements.txt` into a `python/` subfolder (which AWS extracts to `/opt/python/` in the Lambda execution environment) before running `terraform apply`.
 
 ## 💻 Execution & Monitoring via CLI
 
