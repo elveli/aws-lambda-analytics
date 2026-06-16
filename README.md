@@ -24,19 +24,37 @@ The core execution logic is contained in `lambda/src/lambda_function.py`. It is 
 4. **Data Enrichment & Persistence**: For each message, it extracts the JSON payload, generates a unique `EventId` (UUID) and `Timestamp`, and persists the enriched item into DynamoDB.
 5. **Fault Tolerance**: If an exception occurs, the error is logged and re-raised. This intentional failure prevents the SQS batch from being deleted, triggering an automated retry. After repeated failures, SQS shuttles the message to the configured Dead Letter Queue (DLQ).
 
+## ⚙️ Custom Runtime Architecture (`provided.al2023`)
+
+The application is deployed using the `provided.al2023` Lambda runtime. This is an advanced technique rather than using a standard managed runtime (like `python3.12`):
+
+- **Bare Metal OS**: `provided.al2023` provides a minimal Amazon Linux 2023 environment without any pre-installed language runtimes.
+- **The `bootstrap` File**: When Lambda provisions this environment, it requires an executable file named `bootstrap`. Our repository includes `lambda/src/bootstrap` which serves as the main entry point for the container.
+- **Runtime Interface Client (RIC)**: The `bootstrap` script initializes the environment and executes the `awslambdaric` package (AWS Lambda Runtime Interface Client). The RIC handles HTTP polling for new events from the AWS Lambda Runtime API and routes them to our `lambda_function.py`.
+- **Advanced Use Cases**: This pattern gives you complete control over the execution environment. You can compile alternative Python versions from source, inject monitoring agents that need to run as parallel processes, or execute statically compiled binaries.
+
+> **Note on `python3: not found` execution errors:** `provided.al2023` is a completely bare OS image. If you attempt to invoke this Lambda as-is, you will receive `Runtime.ExitError: exit status 127` because `python3` does not exist on the image. In a real-world scenario, you must statically compile Python and bundle it into the layer, or compile and upload your application using a Docker image (`Image` package type). For ease of execution out-of-the-box, the `terraform/lambda.tf` has been updated to use the fully managed `python3.12` runtime while preserving the `provided.al2023` scripting for demonstration purposes.
+
 ## 🛠 Deployment Instructions
 Ensure you have the AWS CLI and Terraform installed.
 
-1. Navigate to the `terraform/` directory.
-2. Initialize Terraform:
+1. Navigate to the `lambda/layer/` directory and install the required dependencies so they can be zipped by Terraform:
    ```bash
+   cd lambda/layer
+   pip install -r requirements.txt -t python/
+   cd ../../
+   ```
+2. Navigate to the `terraform/` directory.
+3. Initialize Terraform:
+   ```bash
+   cd terraform
    terraform init
    ```
-3. Plan the deployment:
+4. Plan the deployment:
    ```bash
    terraform plan
    ```
-4. Apply the infrastructure:
+5. Apply the infrastructure:
    ```bash
    terraform apply
    ```

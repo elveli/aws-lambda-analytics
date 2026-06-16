@@ -76,7 +76,7 @@ data "archive_file" "layer_zip" {
 resource "aws_lambda_layer_version" "dependencies" {
   filename            = data.archive_file.layer_zip.output_path
   layer_name          = "lambda-showcase-dependencies"
-  compatible_runtimes = ["provided.al2023"] # Matching the custom runtime
+  compatible_runtimes = ["provided.al2023", "python3.12"] # Supported runtimes
   source_code_hash    = data.archive_file.layer_zip.output_base64sha256
 }
 
@@ -88,8 +88,9 @@ resource "aws_lambda_function" "event_processor" {
   handler          = "lambda_function.lambda_handler"
   source_code_hash = data.archive_file.lambda_zip.output_base64sha256
 
-  # Demonstration of Custom Runtime
-  runtime = "provided.al2023"
+  # We are using python3.12 managed runtime for out-of-the-box execution
+  # (Custom runtime provided.al2023 requires deploying a custom compiled python environment)
+  runtime = "python3.12"
 
   # Advanced Concurrency Configuration
   # Reserves 10 concurrent executions to prevent this Lambda from scaling excessively
