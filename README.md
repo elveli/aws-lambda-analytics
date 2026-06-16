@@ -117,9 +117,9 @@ This application is configured with `Active` tracing using AWS X-Ray, which inte
 
 **Via AWS CLI:**
 ```bash
-# 1. Define time window (last 10 minutes)
-START_TIME=$(date -u -d '10 minutes ago' +%s 2>/dev/null || date -u -v-10m +%s)
-END_TIME=$(date -u +%s)
+# 1. Define time window (last 10 minutes) safely using Python
+START_TIME=$(python3 -c "import time; print(int(time.time() - 600))" 2>/dev/null || python -c "import time; print(int(time.time() - 600))")
+END_TIME=$(python3 -c "import time; print(int(time.time()))" 2>/dev/null || python -c "import time; print(int(time.time()))")
 
 # 2. Get trace summaries
 aws xray get-trace-summaries \
