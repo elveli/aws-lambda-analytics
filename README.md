@@ -48,6 +48,9 @@ chmod +x deploy.sh
 > **Fixing `Runtime.ImportModuleError: No module named 'aws_xray_sdk'`:** 
 > If you deployed manually and encountered this error, it means Terraform packaged an empty Lambda layer because the dependencies were not downloaded first. Running `./deploy.sh` resolves this by cleanly installing `requirements.txt` into a `python/` subfolder (which AWS extracts to `/opt/python/` in the Lambda execution environment) before running `terraform apply`.
 
+> **Fixing `Task timed out after 30.00 seconds`:**
+> If you encounter a hard timeout when running the function, it is likely a network routing issue. By default, Lambdas placed in a VPC lose internet access. While `terraform/vpc.tf` defines Endpoints for SQS and DynamoDB, you must ensure that your Lambda's Security Group allows outbound traffic (`0.0.0.0/0`). Without this, requests to the DynamoDB Gateway Endpoint (which resolves to public AWS prefix lists) are silently dropped, causing boto3 to hang until timeout. The repository's security group settings update has been patched to fix this.
+
 ## 💻 Execution & Monitoring via CLI
 
 Once deployed, you can trigger the workflow and monitor its execution directly from your terminal using the AWS CLI.
