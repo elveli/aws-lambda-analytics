@@ -111,9 +111,9 @@ aws cloudwatch describe-alarms \
 This application is configured with `Active` tracing using AWS X-Ray, which intercepts requests made via boto3 (e.g., to DynamoDB and SQS) and maps out execution latency.
 
 **Via AWS Console:**
-1. Navigate to **CloudWatch** > **X-Ray traces** > **Service map** in the AWS Management Console.
-2. You will see a visual node graph demonstrating the path from your Lambda function to DynamoDB.
-3. Click on **Traces**, apply the `service("LambdaShowcaseProcessor")` filter, and click on any trace ID. This will open a detailed waterfall diagram showing exactly how many milliseconds the `PutItem` DynamoDB operation or the `process_single_message` subsegment took.
+1. Type **X-Ray** into the top navigation search bar and select **Service map** (or navigate to **CloudWatch** > left menu **X-Ray traces** > **Service map**).
+2. You will see a visual node graph demonstrating the path from your Lambda function to AWS services like DynamoDB and SQS.
+3. Click on the **Traces** left menu item, apply the `service("LambdaShowcaseProcessor")` filter (or simply click a node in the Service Map to view its traces), and click on any trace ID. This will open a detailed waterfall diagram showing exactly how many milliseconds the `PutItem` DynamoDB operation or the `process_single_message` subsegment took.
 
 **Via AWS CLI:**
 ```bash
@@ -131,6 +131,23 @@ aws xray get-trace-summaries \
 # 3. Retrieve detailed waterfall timeline for a specific trace ID
 # (replace the ID below with one outputted by the previous command)
 aws xray batch-get-traces --trace-ids "1-6a31b2d9-02bce06439f77cbc3e618984"
+```
+
+### 7. Inspect Function Settings & Network Configuration
+You can retrieve the Lambda function's current configuration, including its Memory allocations, Timeout settings, assigned VPC, Subnets, and Security Groups (SGs) directly using the AWS CLI.
+
+**View Full Function Configuration:**
+```bash
+aws lambda get-function-configuration \
+    --function-name LambdaShowcaseProcessor
+```
+
+**View Only Network, Security Group, and Timeout Settings (using query filtering):**
+```bash
+aws lambda get-function-configuration \
+    --function-name LambdaShowcaseProcessor \
+    --query '{VpcConfig: VpcConfig, MemorySize: MemorySize, Timeout: Timeout, Runtime: Runtime}' \
+    --output json
 ```
 
 ## 💰 Cost Optimization Aspect
