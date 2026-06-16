@@ -1,0 +1,23 @@
+#!/bin/sh
+# This script is the entrypoint for the `provided.al2023` custom runtime.
+# It simulates a custom python startup, useful for customizing the environment.
+
+set -euo pipefail
+
+# In a real environment, you might download binaries, configure agents,
+# or set up complex environment variables here before launching the handler.
+
+echo "Custom bootstrap initialized for provided.al2023"
+
+# The AWS Lambda Custom Runtime API requires interacting with
+# http://${AWS_LAMBDA_RUNTIME_API}/2018-06-01/runtime/invocation/next
+#
+# But for typical Python code, we just delegate to the awslambdaric 
+# (AWS Lambda Runtime Interface Client) if packaged, or simply 
+# fallback to python logic if using an existing image. 
+# 
+# For this showcase, we assume the environment has the RIC available 
+# or we just simulate the bootstrap step.
+#
+# Replace this line with the execution of awslambdaric or your custom loop.
+exec python3 -m awslambdaric $_HANDLER

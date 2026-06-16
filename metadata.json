@@ -1,0 +1,6 @@
+{
+  "name": "AWS Lambda Analytics Showcase",
+  "description": "An advanced demonstration of AWS Lambda interacting async with SQS and DynamoDB.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
