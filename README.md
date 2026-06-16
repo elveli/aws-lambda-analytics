@@ -150,6 +150,13 @@ aws lambda get-function-configuration \
     --output json
 ```
 
+**Describe a Specific Security Group:**
+If you want to view the inbound and outbound traffic rules for any Security Group (such as the one outputted from the VpcConfig step), use the EC2 describe-security-groups command:
+```bash
+aws ec2 describe-security-groups \
+    --group-ids sg-0664944e09e6cce57
+```
+
 ## 💰 Cost Optimization Aspect
 This serverless architecture is highly cost-effective, optimized for pay-as-you-go pricing:
 - **Compute (Lambda)**: Charged per millisecond of execution and memory allocated. Concurrency limits prevent unexpected runaway costs due to recursive loops.
