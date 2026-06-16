@@ -104,6 +104,32 @@ aws cloudwatch describe-alarms \
     --output table
 ```
 
+### 6. Analyze X-Ray Traces via CLI & Console
+This application is configured with `Active` tracing using AWS X-Ray, which intercepts requests made via boto3 (e.g., to DynamoDB and SQS) and maps out execution latency.
+
+**Via AWS Console:**
+1. Navigate to **CloudWatch** > **X-Ray traces** > **Service map** in the AWS Management Console.
+2. You will see a visual node graph demonstrating the path from your Lambda function to DynamoDB.
+3. Click on **Traces**, apply the `service("LambdaShowcaseProcessor")` filter, and click on any trace ID. This will open a detailed waterfall diagram showing exactly how many milliseconds the `PutItem` DynamoDB operation or the `process_single_message` subsegment took.
+
+**Via AWS CLI:**
+```bash
+# 1. Define time window (last 10 minutes)
+START_TIME=$(date -u -d '10 minutes ago' +%s 2>/dev/null || date -u -v-10m +%s)
+END_TIME=$(date -u +%s)
+
+# 2. Get trace summaries
+aws xray get-trace-summaries \
+    --start-time $START_TIME \
+    --end-time $END_TIME \
+    --query 'TraceSummaries[*].Id' \
+    --output text
+
+# 3. Retrieve detailed waterfall timeline for a specific trace ID
+# (replace the ID below with one outputted by the previous command)
+aws xray batch-get-traces --trace-ids "1-6a31b2d9-02bce06439f77cbc3e618984"
+```
+
 ## 💰 Cost Optimization Aspect
 This serverless architecture is highly cost-effective, optimized for pay-as-you-go pricing:
 - **Compute (Lambda)**: Charged per millisecond of execution and memory allocated. Concurrency limits prevent unexpected runaway costs due to recursive loops.
